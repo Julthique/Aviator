@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Aviator</title>
+  </head>
+  <body>
+    <div class="Game">
+      <div id="start"></div>
+      <div id="score"></div>
+      <div id="sante"></div>
+      <div id="niveau"></div>
+      <div id="niveau_bar"></div>
+      <script type="module">
+        import * as THREE from "https://cdn.skypack.dev/pin/three@v0.150.1-r75e9MvYwn7pBFuUt6Gu/mode=imports,min/optimized/three.js";
+        import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
+        import immeuble1 from "../Objet/immeuble1.js";
+        import immeuble2 from "../Objet/immeuble2.js";
+        import immeuble3 from "../Objet/immeuble3.js";
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////// SCENE ET CAMERA ////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0dcfff);
+        let SCREEN_WIDTH = window.innerWidth;
+        let SCREEN_HEIGHT = window.innerHeight;
+        let ratioLargeurHauteur = SCREEN_WIDTH / SCREEN_HEIGHT;
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          ratioLargeurHauteur,
+          0.1,
+          1000
+        );
+        camera.position.set(0, 80, 40);
+        camera.rotation.set(-0.2, 0, 0);
+
+        const camera2 = new THREE.PerspectiveCamera(
+          75,
+          ratioLargeurHauteur,
+          0.1,
+          1000
+        );
+        camera2.position.set(300, 0, 0);
+        camera2.rotation.set(0, 1, 0);
+
+        let cameraActive = camera;
+        let Choixcamera = true;
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        document.body.appendChild(renderer.domElement);
+        const controls = new OrbitControls(camera2, renderer.domElement);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////// CREATION OBJETS ////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Planéte
+        const planete = new THREE.Group();
+        const geometry_planete = new THREE.CylinderGeometry();
+        const material_planete = new THREE.MeshPhongMaterial({
+          color: 0xffffff,
+        });
+        const loader = new THREE.TextureLoader();
+        loader.load(
+          "../img/road.jpg",
+          function (texture) {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 1);
+            texture.rotate = 1;
+            material_planete.map = texture;
+            //https://threejs.org/docs/#api/en/materials/Material
+            material_planete.needsUpdate = true;
+          },
+          undefined,
+          function (err) {
+            console.error(err);
+          }
+        );
+        const cylinder = new THREE.Mesh(geometry_planete, material_planete);
+        cylinder.scale.set(60, 200, 60, 0);
+        cylinder.rotateZ(Math.PI / 2);
+        planete.add(cylinder);
+
+        // Avion
+        const geometry_carlingue = new THREE.BoxGeometry();
+        const material_carlingue = new THREE.MeshToonMaterial({
+          color: 0xff0000,
+        });
+        const carlingue = new THREE.Mesh(
+          geometry_carlingue,
+          material_carlingue
+        );
+        carlingue.position.set(0, 0, 0);
+        carlingue.scale.set(2, 2, 4);
+
+        const geometry_helice = new THREE.BoxGeometry();
+        const material_helice = new THREE.MeshToonMaterial({ color: 0x666666 });
+        const helice = new THREE.Mesh(geometry_helice, material_helice);
+        helice.position.set(0, 0, -2);
+        helice.scale.set(0.5, 3.5, 0);
+
+        const avion = new THREE.Group();
+        avion.add(carlingue);
+        avion.add(helice);
+
+        scene.add(avion);
+        avion.position.set(0, 70, 0);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////// CREATION IMMEUBLE ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Ajout des Immeubles sur la planéte
+
+        const batiment1 = immeuble1();
+        batiment1.position.set(-150, -85, 0);
+        batiment1.rotateY(-Math.PI / 2);
+        planete.add(batiment1);
+
+        const batiment2 = immeuble1();
+        batiment2.position.set(150, -85, 0);
+        batiment2.rotateY(Math.PI / 2);
+        planete.add(batiment2);
+
+        const batiment3 = immeuble2();
+        batiment3.position.set(150, 85, 0);
+        batiment3.rotateY(Math.PI / 2);
+        planete.add(batiment3);
+
+        const batiment4 = immeuble2();
+        batiment4.position.set(-150, 85, 0);
+        batiment4.rotateY(-Math.PI / 2);
+        planete.add(batiment4);
+
+        const batiment5 = immeuble1();
+        batiment5.position.set(150, 0, -85);
+        batiment5.rotateY(Math.PI / 2);
+        batiment5.rotateZ(Math.PI / 2);
+        planete.add(batiment5);
+
+        const batiment6 = immeuble2();
+        batiment6.position.set(-150, 0, -85);
+        batiment6.rotateY(-Math.PI / 2);
+        batiment6.rotateZ(Math.PI / 2);
+        planete.add(batiment6);
+
+        const batiment7 = immeuble1();
+        batiment7.position.set(150, 0, 85);
+        batiment7.rotateY(Math.PI / 2);
+        batiment7.rotateZ(-Math.PI / 2);
+        planete.add(batiment7);
+
+        const batiment8 = immeuble3();
+        batiment8.position.set(-150, 0, 85);
+        batiment8.rotateY(-Math.PI / 2);
+        batiment8.rotateZ(-Math.PI / 2);
+        planete.add(batiment8);
+
+        const batiment9 = immeuble1();
+        batiment9.position.set(
+          -150,
+          85 * Math.cos(Math.PI / 6),
+          -50 * Math.cos(Math.PI / 6)
+        );
+        batiment9.rotateY(-Math.PI / 2);
+        batiment9.rotateZ(Math.sin(Math.PI / 6));
+        planete.add(batiment9);
+
+        const batiment10 = immeuble2();
+        batiment10.position.set(
+          -150,
+          50 * Math.cos(Math.PI / 6),
+          -85 * Math.cos(Math.PI / 6)
+        );
+        batiment10.rotateY(-Math.PI / 2);
+        batiment10.rotateZ(Math.sin(Math.PI / 2));
+        planete.add(batiment10);
+
+        const batiment11 = immeuble1();
+        batiment11.position.set(
+          -150,
+          -50 * Math.cos(Math.PI / 6),
+          -85 * Math.cos(Math.PI / 6)
+        );
+        batiment11.rotateY(-Math.PI / 2);
+        batiment11.rotateZ(-Math.sin(Math.PI / 2));
+        planete.add(batiment11);
+
+        const batiment12 = immeuble3();
+        batiment12.position.set(
+          -150,
+          -85 * Math.cos(Math.PI / 6),
+          -50 * Math.cos(Math.PI / 6)
+        );
+        batiment12.rotateY(-Math.PI / 2);
+        batiment12.rotateZ(Math.sin(-Math.PI / 6));
+        planete.add(batiment12);
+
+        const batiment13 = immeuble1();
+        batiment13.position.set(
+          -150,
+          -85 * Math.cos(Math.PI / 6),
+          50 * Math.cos(Math.PI / 6)
+        );
+        batiment13.rotateY(-Math.PI / 2);
+        batiment13.rotateZ(Math.sin(Math.PI / 6));
+        planete.add(batiment13);
+
+        const batiment14 = immeuble1();
+        batiment14.position.set(
+          -150,
+          -50 * Math.cos(Math.PI / 6),
+          85 * Math.cos(Math.PI / 6)
+        );
+        batiment14.rotateY(-Math.PI / 2);
+        batiment14.rotateZ(Math.sin(Math.PI / 2));
+        planete.add(batiment14);
+
+        const batiment15 = immeuble3();
+        batiment15.position.set(
+          -150,
+          50 * Math.cos(Math.PI / 6),
+          85 * Math.cos(Math.PI / 6)
+        );
+        batiment15.rotateY(-Math.PI / 2);
+        batiment15.rotateZ(-Math.sin(Math.PI / 2));
+        planete.add(batiment15);
+
+        const batiment16 = immeuble1();
+        batiment16.position.set(
+          -150,
+          85 * Math.cos(Math.PI / 6),
+          50 * Math.cos(Math.PI / 6)
+        );
+        batiment16.rotateY(-Math.PI / 2);
+        batiment16.rotateZ(Math.sin(-Math.PI / 6));
+        planete.add(batiment16);
+
+        const batiment17 = immeuble1();
+        batiment17.position.set(
+          150,
+          85 * Math.cos(Math.PI / 6),
+          -50 * Math.cos(Math.PI / 6)
+        );
+        batiment17.rotateY(Math.PI / 2);
+        batiment17.rotateZ(Math.sin(-Math.PI / 6));
+        planete.add(batiment17);
+
+        const batiment18 = immeuble1();
+        batiment18.position.set(
+          150,
+          50 * Math.cos(Math.PI / 6),
+          -85 * Math.cos(Math.PI / 6)
+        );
+        batiment18.rotateY(Math.PI / 2);
+        batiment18.rotateZ(Math.sin(-Math.PI / 2));
+        planete.add(batiment18);
+
+        const batiment19 = immeuble2();
+        batiment19.position.set(
+          150,
+          -40 * Math.cos(Math.PI / 6),
+          -65 * Math.cos(Math.PI / 6)
+        );
+        batiment19.rotateY(Math.PI / 2);
+        batiment19.rotateZ(-Math.sin(-Math.PI / 2));
+        planete.add(batiment19);
+
+        const batiment20 = immeuble3();
+        batiment20.position.set(
+          150,
+          -85 * Math.cos(Math.PI / 6),
+          -50 * Math.cos(Math.PI / 6)
+        );
+        batiment20.rotateY(Math.PI / 2);
+        batiment20.rotateZ(Math.sin(Math.PI / 6));
+        planete.add(batiment20);
+
+        const batiment21 = immeuble1();
+        batiment21.position.set(
+          150,
+          -85 * Math.cos(Math.PI / 6),
+          50 * Math.cos(Math.PI / 6)
+        );
+        batiment21.rotateY(Math.PI / 2);
+        batiment21.rotateZ(Math.sin(-Math.PI / 6));
+        planete.add(batiment21);
+
+        const batiment22 = immeuble2();
+        batiment22.position.set(
+          150,
+          -35 * Math.cos(Math.PI / 6),
+          65 * Math.cos(Math.PI / 6)
+        );
+        batiment22.rotateY(Math.PI / 2);
+        batiment22.rotateZ(Math.sin(-Math.PI / 2));
+        planete.add(batiment22);
+
+        const batiment23 = immeuble2();
+        batiment23.position.set(
+          150,
+          50 * Math.cos(Math.PI / 6),
+          85 * Math.cos(Math.PI / 6)
+        );
+        batiment23.rotateY(Math.PI / 2);
+        batiment23.rotateZ(-Math.sin(-Math.PI / 2));
+        planete.add(batiment23);
+
+        const batiment24 = immeuble1();
+        batiment24.position.set(
+          150,
+          85 * Math.cos(Math.PI / 6),
+          50 * Math.cos(Math.PI / 6)
+        );
+        batiment24.rotateY(Math.PI / 2);
+        batiment24.rotateZ(Math.sin(Math.PI / 6));
+        planete.add(batiment24);
+
+        scene.add(planete);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////  CREATION BOMBES ///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Création des sphere
+        const geometry_sphere = new THREE.SphereGeometry(4, 16, 8);
+        const material_sphere = new THREE.MeshToonMaterial({ color: 0xffffff,
+        })
+        const loader2 = new THREE.TextureLoader();
+        loader2.load(
+          "../img/bombe.gif",
+          function (texture) {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 1);
+            texture.rotate = 1;
+            material_sphere.map = texture;
+            //https://threejs.org/docs/#api/en/materials/Material
+            material_sphere.needsUpdate = true;
+          },
+          undefined,
+          function (err) {
+            console.error(err);
+          }
+        );;
+
+        let spheres_txt = ['sphere1', 'sphere2', 'sphere3', 'sphere4', 'sphere5', 'sphere6', 'sphere7', 'sphere8', 'sphere9', 'sphere10', 'sphere11', 'sphere12', 'sphere13', 'sphere14', 'sphere15', 'sphere16'];
+
+        // create a new sphere for all ocurence into sphere
+
+        const sphere1 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere1.rotateY(-Math.PI/2);
+        scene.add(sphere1);
+        
+        const sphere2 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere2.rotateY(-Math.PI/2);
+        scene.add(sphere2);
+
+        const sphere3 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere3.rotateY(-Math.PI/2);
+        scene.add(sphere3);
+        
+        const sphere4 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere4.rotateY(-Math.PI/2);
+        scene.add(sphere4);
+
+        const sphere5 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere5.rotateY(-Math.PI/2);
+        scene.add(sphere5);
+        
+        const sphere6 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere6.rotateY(-Math.PI/2);
+        scene.add(sphere6);
+        
+        const sphere7 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere7.rotateY(-Math.PI/2);
+        scene.add(sphere7);
+        
+        const sphere8 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere8.rotateY(-Math.PI/2);
+        scene.add(sphere8);
+
+        const sphere9 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere9.rotateY(-Math.PI/2);
+        scene.add(sphere9);
+        
+        const sphere10 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere10.rotateY(-Math.PI/2);
+        scene.add(sphere10);
+
+        const sphere11 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere11.rotateY(-Math.PI/2);
+        scene.add(sphere3);
+        
+        const sphere12 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere12.rotateY(-Math.PI/2);
+        scene.add(sphere12);
+
+        const sphere13 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere13.rotateY(-Math.PI/2);
+        scene.add(sphere13);
+        
+        const sphere14 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere14.rotateY(-Math.PI/2);
+        scene.add(sphere14);
+        
+        const sphere15 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere15.rotateY(-Math.PI/2);
+        scene.add(sphere15);
+        
+        const sphere16 = new THREE.Mesh(geometry_sphere, material_sphere);
+        sphere16.rotateY(-Math.PI/2);
+        scene.add(sphere16);
+
+        let spheres = [sphere1, sphere2, sphere3, sphere4, sphere5, sphere6, sphere7, sphere8, sphere9, sphere10, sphere11, sphere12, sphere13, sphere14, sphere15, sphere16];
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////  LUMIERE ///////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Lumière 1
+        const soleil1 = new THREE.DirectionalLight( 0xffffff, 1 );
+        soleil1.position.set( 500, 200, 0 );
+        scene.add(soleil1);
+
+        // Lumière 2
+        const soleil2 = new THREE.DirectionalLight( 0xffffff, 1 );
+        soleil2.position.set( -500, 200, 0 );
+        scene.add(soleil2);
+
+  
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////  TEXTE / INFO BULLE ////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        let etat = false;
+        const start = document.getElementById("start");
+
+        start.innerHTML =
+          "<h1>AVIATOR !</h1><a>appuyer sur 'ENTRÉE' pour commencer !</a>";
+
+        const score = document.getElementById("score");
+        let point = 0;
+
+        const sante = document.getElementById("sante");
+        let vie = 5;
+
+        const niveau = document.getElementById("niveau");
+        const niveau_bar = document.getElementById("niveau_bar");
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////  EVENEMENT TOUCHE  /////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Rotation Automatique
+
+        let lancement = false;
+        function evenementTouche(event) {
+          switch (event.key) {
+            // Lancement avec la touche  entrée
+            case "Enter":
+              lancement = !lancement;
+              if (lancement) {
+                console.log("Start");
+                start.style.display = "none";
+              } else {
+                console.log("Game Over");
+                start.style.display = "block";
+                start.innerHTML = "<h1>PAUSE</h1>";
+                const startGame = document.getElementById("start");
+                startGame.id= "pause";
+              }
+              etat = true;
+              break;
+
+            // Déplacement de l'avion avec les fléches
+            case "ArrowUp":
+              if (avion.position.y < 95) {
+                avion.position.y += 2;
+              }
+              break;
+            case "ArrowDown":
+              if (avion.position.y > 67) {
+                avion.position.y -= 2;
+              }
+              break;
+            case "ArrowLeft":
+              if (avion.position.x > -25) {
+                avion.position.x -= 2;
+              }
+              break;
+            case "ArrowRight":
+              if (avion.position.x < 25) {
+                avion.position.x += 2;
+              }
+              break;
+
+            // Changement de caméra
+            case "c":
+              lancement = !lancement;
+              if (lancement) {
+                console.log("Changement de caméra activée");
+                cameraActive = camera2;
+              } else {
+                console.log("Changement de caméra désactivée");
+                cameraActive = camera;
+              }
+              cameraActive.updateProjectionMatrix();
+              break;
+
+            default:
+              break;
+          }
+        }
+        document.addEventListener("keydown", evenementTouche);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////// ANIMATION //////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Déplacement de l'avion avec la souris
+        window.addEventListener("mousemove", function (event) {
+          if (
+            avion.position.y < 95 &&
+            avion.position.y > 67 &&
+            avion.position.x > -25 &&
+            avion.position.x < 25
+          ) {
+            const x = (event.clientX / window.innerWidth) * 2 - 1;
+            const y = -((event.clientY / window.innerHeight) * 2 - 1);
+            avion.position.x = x * 50;
+            avion.position.y = y * 50 + 70;
+          } else if (avion.position.y > 95) {
+            avion.position.y = 94.99;
+          } else if (avion.position.y < 67) {
+            avion.position.y = 67.01;
+          } else if (avion.position.x < -25) {
+            avion.position.x = -24.99;
+          } else if (avion.position.x > 25) {
+            avion.position.x = 24.99;
+          }
+        });
+
+        // fonction création des explosions
+        function explosion() {
+          const geometry_particule = new THREE.PlaneGeometry(Math.random() * 2, Math.random() * 2);
+          const material_particule = new THREE.MeshBasicMaterial();
+          const particule = new THREE.Mesh(geometry_particule, material_particule);
+          const couleur = Math.random() * 3;
+          if (couleur < 1){particule.material.color.set(0xff0000);}
+          else if (couleur < 2){particule.material.color.set(0xffff00);}
+          else{particule.material.color.set(0xff9900);} 
+          particule.position.set(
+            avion.position.x + Math.random() * 15 - 5,
+            avion.position.y + Math.random() * 15 - 5,
+            avion.position.z + Math.random() * 15 - 5
+          );
+
+
+          
+          scene.add(particule);
+          setTimeout(() => {
+            scene.remove(particule);
+          }, 1000);
+        }
+
+        // Détection de collision
+        function detectCollision_sphere() {
+          for (let sphere of spheres) {
+            if (avion.position.distanceTo(sphere.position) < 5) {
+              sphere.material.color.set(0xff0000);
+              if (vie == 1){
+                vie = 0;
+              }
+              else if (vie == 2){
+                vie = 1.1;
+              }
+              else if (vie == 3){
+                vie = 2.1;
+              }
+              else if (vie == 4){
+                vie = 3.1;
+              }
+              else if (vie == 5){
+                vie = 4.1;
+              }
+              for (var i = 0; i < 5; i++) {
+                explosion();
+              }
+              setTimeout(() => {
+                sphere.material.color.set(0xffffff);
+                if (vie == 1.1) {
+                  vie = 1;
+                } 
+                else if (vie == 2.1) {
+                  vie = 2;
+                } 
+                else if (vie == 3.1) {
+                  vie = 3;
+                } 
+                else if (vie == 4.1) {
+                  vie = 4;
+                } 
+              }, 1000);
+            }
+          }
+        }
+        
+        // Mouvement automatique des spheres autour de la planete
+        let angle = 0.01;
+        let direction = "gauche";
+        let hauteur = "haut";
+        let haut_bis1 = 70;
+        let haut_bis2 = -70;
+        function mouvementsphere(angle) {
+          
+          // Mouvement Horizontal des bombes Avec l'ajout de nouvelles bombes tout les 5 niv
+          if (direction == "gauche") {
+            if (sphere1.position.x > -15) {
+              sphere1.position.x -= 0.1;
+              sphere2.position.x -= 0.1;
+              sphere3.position.x += 0.1;
+              sphere4.position.x += 0.1;
+              if (level > 4){
+              sphere5.position.x -= 0.2;
+              sphere6.position.x -= 0.2;
+              sphere7.position.x += 0.2;
+              sphere8.position.x += 0.2;
+              }
+              if (level > 9){
+              sphere9.position.x  -= 0.3;
+              sphere10.position.x -= 0.3;
+              sphere11.position.x += 0.3;
+              sphere12.position.x += 0.3;
+              }
+              if (level > 14){
+              sphere13.position.x -= 0.4;
+              sphere14.position.x -= 0.4;
+              sphere15.position.x += 0.4;
+              sphere16.position.x += 0.4;
+              }
+
+            } else {
+              direction = "droite";
+            }
+          } else if (direction == "droite") {
+            if (sphere1.position.x < 15) {
+              sphere1.position.x += 0.1;
+              sphere2.position.x += 0.1;
+              sphere3.position.x -= 0.1;
+              sphere4.position.x -= 0.1;
+              if (level > 4){
+              sphere5.position.x += 0.2;
+              sphere6.position.x += 0.2;
+              sphere7.position.x -= 0.2;
+              sphere8.position.x -= 0.2;
+              }
+              if (level > 9){
+              sphere9.position.x  += 0.3;
+              sphere10.position.x += 0.3;
+              sphere11.position.x -= 0.3;
+              sphere12.position.x -= 0.3;
+              }
+              if (level > 14){
+              sphere13.position.x += 0.4;
+              sphere14.position.x += 0.4;
+              sphere15.position.x -= 0.4;
+              sphere16.position.x -= 0.4;
+              }
+            } else {
+              direction = "gauche";
+            }
+          }
+              
+          // Mouvement Vertical des bombes
+          if (hauteur == "haut"){
+            if (haut_bis1 < 90){
+              haut_bis1 += 0.2;
+              haut_bis2 -= 0.2;
+            }
+            else{
+              hauteur = "bas";
+            }
+          }
+          else if (hauteur == "bas"){
+            if (haut_bis1 > 70){
+              haut_bis1 -= 0.2;
+              haut_bis2 += 0.2;
+            }
+            else{
+              hauteur = "haut";
+            }
+          }
+
+          sphere1.position.z = Math.cos(angle) * -70 ;
+          sphere2.position.z = Math.sin(angle) * 70  ;
+          sphere3.position.z = Math.cos(angle) * 70  ;
+          sphere4.position.z = Math.sin(angle) * -70 ;
+
+          sphere1.position.y = Math.sin(angle) * haut_bis1;
+          sphere2.position.y = Math.cos(angle) * haut_bis1;
+          sphere3.position.y = Math.sin(angle) * haut_bis2;
+          sphere4.position.y = Math.cos(angle) * haut_bis2;
+          if (level > 4){
+          sphere5.position.z = Math.cos(angle+1) * -70;
+          sphere6.position.z = Math.sin(angle+1) * 70  ;
+          sphere7.position.z = Math.cos(angle+1) * 70  ;
+          sphere8.position.z = Math.sin(angle+1) * -70;
+
+          sphere5.position.y = Math.sin(angle+1) * haut_bis1;
+          sphere6.position.y = Math.cos(angle+1) * haut_bis1;
+          sphere7.position.y = Math.sin(angle+1) * haut_bis2;
+          sphere8.position.y = Math.cos(angle+1) * haut_bis2;
+          }
+          if (level > 9){
+          sphere9.position.z  = Math.cos(angle+2) * -70 ;
+          sphere10.position.z = Math.sin(angle+2) * 70 ;
+          sphere11.position.z = Math.cos(angle+2) * 70 ;
+          sphere12.position.z = Math.sin(angle+2) * -70 ;
+
+          sphere9.position.y = Math.sin(angle +2) *  haut_bis1 ;
+          sphere10.position.y = Math.cos(angle+2) * haut_bis1 ;
+          sphere11.position.y = Math.sin(angle+2) * haut_bis2 ;
+          sphere12.position.y = Math.cos(angle+2) * haut_bis2 ;
+          }
+          if (level > 14){
+          sphere13.position.z = Math.cos(angle+3) * -70 ;
+          sphere14.position.z = Math.sin(angle+3) * 70 ;
+          sphere15.position.z = Math.cos(angle+3) * 70 ;
+          sphere16.position.z = Math.sin(angle+3) * -70 ;
+
+          sphere13.position.y = Math.sin(angle+3) * haut_bis1;
+          sphere14.position.y = Math.cos(angle+3) * haut_bis1;
+          sphere15.position.y = Math.sin(angle+3) * haut_bis2;
+          sphere16.position.y = Math.cos(angle+3) * haut_bis2;
+          }
+
+
+
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////  HUD ///////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        function afficheVie() {
+          sante.innerHTML =
+            "<img src ='../img/sante_" + vie + ".gif' alt='vie du joueur'>";
+          if( vie == 0 ){
+            lancement = false;
+            start.style.display = "block";
+            start.innerHTML = "<h1>GAME OVER</h1> <a href='http://localhost/ThreeJS_SAE402/version%203/index.html'><h4>REJOUER</h4></a>";
+            const startGame = document.getElementById("start");
+            startGame.id= "pause";
+          } 
+        }
+
+        // fonction qui affiche le niveau du joueur
+        let level = 1;
+        let pourcentage_niv = 0;
+        function afficheNiveau() {
+          pourcentage_niv += 0.2;
+          niveau_bar.innerHTML =
+            "<a>" + Math.round(pourcentage_niv) + " % </a>";
+          if (pourcentage_niv >= 100) {
+            level++;
+            pourcentage_niv = 0;
+          }
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////  LANCEMENT /////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // fonction qui lance le jeu
+        function animate() {
+          requestAnimationFrame(animate);
+          if (lancement) {
+            planete.rotation.x += 0.0095 + 0.0005 * level;
+            helice.rotation.z += 0.19 + 0.01 * level;
+            point += 0.019 + 0.001 * level;
+            angle += 0.009 + 0.001 * level;
+            score.innerHTML = "<a>Distance : " + Math.round(point) + " km</a>";
+            niveau.innerHTML = "<h1>Niveau de vitesse : " + level + " </h1>";
+            detectCollision_sphere();
+            afficheVie();
+            if (level < 40) {
+              afficheNiveau();
+            } else {
+              niveau_bar.innerHTML = "<a>Niveau Max</a>";
+            }
+            mouvementsphere(angle);
+          }
+          renderer.render(scene, cameraActive);
+        }
+        animate();
+
+        // Resize de la fenêtre
+        function onWindowResize() {
+          console.log("Hello Wolrd !");
+          SCREEN_WIDTH = window.innerWidth;
+          SCREEN_HEIGHT = window.innerHeight;
+          ratioLargeurHauteur = SCREEN_WIDTH / SCREEN_HEIGHT;
+          camera.aspect = ratioLargeurHauteur;
+          camera.updateProjectionMatrix();
+
+          const tailleFrustum = 100;
+          camera2.left = -0.5 * tailleFrustum * ratioLargeurHauteur;
+          camera2.right = 0.5 * tailleFrustum * ratioLargeurHauteur;
+          camera2.top = 0.5 * tailleFrustum;
+          camera2.bottom = -0.5 * tailleFrustum;
+          camera2.updateProjectionMatrix();
+
+          renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
+        window.addEventListener("resize", onWindowResize);
+
+        // Zoom
+        controls.minDistance = 0;
+        controls.maxDistance = 10000;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.dampingFactor = 0.05;
+      </script>
+    </div>
+  </body>
+</html>
